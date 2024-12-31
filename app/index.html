@@ -1,19 +1,38 @@
+<!DOCTYPE html>
 <html lang="en">
   <head>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
-      rel="stylesheet"
-    />
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BlackJack</title>
-    <link rel="stylesheet" href="style.css" />
   </head>
-   </body>
-      <div class="container"></div>
+  <body>
+
+    <header>
+      <h1>BlackJack</h1>
+    </header>
+
+    <div class="button-container">
+      <button id="hit-button">Hit</button>
+      <button id="stand-button">Stand</button>
+    </div>
+
+    <main>
+      <!-- Dealer Section -->
+      <section class="dealer">
+        <h2 id="dealer-sum">Dealer: 0</h2>
+        <div id="dealer-cards" class="cards"></div>
+      </section>
+
+      <!-- Player Section -->
+      <section class="player">
+        <h2 id="player-sum">Player: 0</h2>
+        <div id="player-cards" class="cards"></div>
+      </section>
+
+      <!-- Status Message -->
+      <div id="status-message" class="status">Welcome to Blackjack!</div>
+    </main>
+
+    <script type="module" src="blackjack.js"></script>
   </body>
-  <script type="module" src="main.js"></script>
-  <script src="index.js"></script>
 </html>
