@@ -2,41 +2,36 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Blackjack</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>BlackJack</title>
   </head>
   <body>
 
     <header>
-      <h1>Blackjack</h1>
+      <h1>BlackJack</h1>
     </header>
-
-
-    <div class="dealer">
-      <h2 id="dealer-sum">Dealer Count: </h2>
-      <div id="dealer-cards" class="cards"></div>
-    </div>
-
-
-    <div class="player">
-      <h2 id="player-sum">Player Count: </h2>
-      <div id="player-cards" class="cards"></div>
-    </div>
-
-
 
     <div class="button-container">
       <button id="hit-button">Hit</button>
       <button id="stand-button">Stand</button>
     </div>
 
-  
+    <main>
+      <!-- Dealer Section -->
+      <section class="dealer">
+        <h2 id="dealer-sum">Dealer: 0</h2>
+        <div id="dealer-cards" class="cards"></div>
+      </section>
 
+      <!-- Player Section -->
+      <section class="player">
+        <h2 id="player-sum">Player: 0</h2>
+        <div id="player-cards" class="cards"></div>
+      </section>
 
-  
-
+      <!-- Status Message -->
+      <div id="status-message" class="status">Welcome to Blackjack!</div>
+    </main>
 
     <script type="module" src="blackjack.js"></script>
   </body>
