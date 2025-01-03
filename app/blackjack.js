@@ -18,8 +18,6 @@ function getCardValue(card) {
   }
   return card.value;
 }
-
-
 /* 
 create 2 cards faced up on players side 
 
@@ -36,11 +34,11 @@ if hit add a card faced up on players side - record value -> if not over 21 ask 
 if stand have both values compared and which ever one is the highest wins( if player value is higher "you win" if dealer higher "you lose") -> wipe all cards on screen and repeat first 4 steps
 
 
-
+//player 1 value
+//dealer value
 
 
 
 
 
 */
-
