@@ -10,81 +10,31 @@ const standButton = document.getElementById("stand-button");
 let playerHand = [];
 let dealerHand = [];
 
-function shuffleDeck(deck) {
+const shuffleDeck = (deck) => {
   for (let i = deck.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [deck[i], deck[j]] = [deck[j], deck[i]];
   }
-}
+};
 
-function getCardValue(card) {
-  if (Array.isArray(card.value)) {
-    return card.value[1];
-  }
-  return card.value;
-}
+const getCardValue = (card) =>
+  Array.isArray(card.value) ? card.value[1] : card.value;
 
-function dealCards() {
-  shuffleDeck(deck);
-
-  playerHand = [deck.pop(), deck.pop()];
-  dealerHand = [deck.pop(), deck.pop()];
-
-  displayCards();
-
-  // Check if the dealer has 21 at the start
-  const dealerTotal = dealerHand.reduce(
-    (sum, card) => sum + getCardValue(card),
-    0
-  );
-  if (dealerTotal === 21) {
-    setTimeout(() => {
-      alert("Dealer has a Blackjack! Dealer wins!");
-      resetGame();
-    }, 300); // Delay alert until after cards are displayed
-  }
-
-  // Check if the player has 21 at the start
-  const playerTotal = playerHand.reduce(
-    (sum, card) => sum + getCardValue(card),
-    0
-  );
-  if (playerTotal === 21) {
-    setTimeout(() => {
-      alert("Player has a Blackjack! Player wins!");
-      resetGame();
-    }, 300); // Delay alert until after cards are displayed
-  }
-}
-
-function displayCards() {
-  playerCardsContainer.innerHTML = "";
-  dealerCardsContainer.innerHTML = "";
-
-  playerHand.forEach((card) => {
-    playerCardsContainer.insertAdjacentHTML(
-      "beforeend",
-      `<div class="card w-1/6 h-[400px] bg-red-500 rounded-3xl flex flex-col items-center justify-evenly m-2 border-2 border-black">  
-        <img src="${card.image}" alt="${card.title}" class="card-img rounded-3xl w-50% h-50%">
-      </div>`
-    );
-  });
-
-  dealerHand.forEach((card, index) => {
-    let cardHTML = `
+const renderCards = (hand, container, hideSecondCard = false) => {
+  container.innerHTML = "";
+  hand.forEach((card, index) => {
+    const imgSrc =
+      hideSecondCard && index === 1 ? "path/to/back-of-card.jpg" : card.image;
+    const cardHTML = `
       <div class="card w-1/6 h-[400px] bg-red-500 rounded-3xl flex flex-col items-center justify-evenly m-2 border-2 border-black">
-        <img src="${
-          index === 1 ? "path/to/back-of-card.jpg" : card.image
-        }" alt="${card.title}" class="card-img rounded-3xl w-50% h-50%">
+        <img src="${imgSrc}" alt="${card.title}" class="card-img rounded-3xl w-50% h-50%">
       </div>
     `;
-    dealerCardsContainer.insertAdjacentHTML("beforeend", cardHTML);
+    container.insertAdjacentHTML("beforeend", cardHTML);
   });
+};
 
-  updateScores();
-}
-
-function updateScores() {
+const updateScores = () => {
   const playerTotal = playerHand.reduce(
     (sum, card) => sum + getCardValue(card),
     0
@@ -98,56 +48,60 @@ function updateScores() {
   dealerSumDisplay.textContent = `Dealer Count: ${dealerTotal}`;
 
   if (playerTotal > 21) {
-    alert("Player bust! You lose.");
+    const bustCard = playerHand[playerHand.length - 1];
+    alert(`Player busts with the card: ${bustCard.title}. You lose.`);
     resetGame();
   }
-}
+};
 
-function resetGame() {
-  hitButton.disabled = true;
-  standButton.disabled = true;
+const resetGame = () => {
+  hitButton.disabled = false;
+  standButton.disabled = false;
+  playerHand = [];
+  dealerHand = [];
+  dealCards();
+};
 
-  playerCardsContainer.innerHTML = "";
-  dealerCardsContainer.innerHTML = "";
+const dealCards = () => {
+  shuffleDeck(deck);
+  playerHand = [deck.pop(), deck.pop()];
+  dealerHand = [deck.pop(), deck.pop()];
+  renderCards(playerHand, playerCardsContainer);
+  renderCards(dealerHand, dealerCardsContainer, true);
 
-  setTimeout(() => {
-    playerHand = [];
-    dealerHand = [];
-    dealCards();
-    hitButton.disabled = false;
-    standButton.disabled = false;
-  }, 0);
-}
+  // Dealer wins instantly if they have 21
+  const dealerTotal = dealerHand.reduce(
+    (sum, card) => sum + getCardValue(card),
+    0
+  );
+  if (dealerTotal === 21) {
+    alert("Dealer has a Blackjack! Dealer wins!");
+    resetGame();
+  }
+};
 
 hitButton.addEventListener("click", () => {
   playerHand.push(deck.pop());
-  displayCards();
+  renderCards(playerHand, playerCardsContainer);
+  updateScores();
 });
 
 standButton.addEventListener("click", () => {
   hitButton.disabled = true;
   standButton.disabled = true;
 
-  dealerCardsContainer.innerHTML = "";
-  dealerHand.forEach((card, index) => {
-    const cardHTML = `
-      <div class="card w-1/6 h-[400px] bg-red-500 rounded-3xl flex flex-col items-center justify-evenly m-2 border-2 border-black">
-        <img src="${card.image}" alt="${card.title}" class="card-img rounded-3xl w-50% h-50%">
-      </div>
-    `;
-    dealerCardsContainer.insertAdjacentHTML("beforeend", cardHTML);
-  });
+  renderCards(dealerHand, dealerCardsContainer);
 
   let dealerTotal = dealerHand.reduce(
     (sum, card) => sum + getCardValue(card),
     0
   );
-
   // Dealer hits if their total is 16 or less
   while (dealerTotal <= 16) {
-    dealerHand.push(deck.pop());
+    const newCard = deck.pop();
+    dealerHand.push(newCard);
     dealerTotal = dealerHand.reduce((sum, card) => sum + getCardValue(card), 0);
-    displayCards(); // Update cards after each hit
+    renderCards(dealerHand, dealerCardsContainer);
   }
 
   const playerTotal = playerHand.reduce(
@@ -155,10 +109,9 @@ standButton.addEventListener("click", () => {
     0
   );
 
-  // After displaying all dealer cards, now show the result
   setTimeout(() => {
     if (dealerTotal > 21) {
-      alert("Dealer bust! You win!");
+      alert("Dealer busts! You win.");
     } else if (dealerTotal > playerTotal) {
       alert("Dealer wins! You lose.");
     } else if (dealerTotal === playerTotal) {
@@ -166,9 +119,8 @@ standButton.addEventListener("click", () => {
     } else {
       alert("You win!");
     }
-
     resetGame();
-  }, 300); // Delay alert until after cards are fully displayed
+  }, 300);
 });
 
 dealCards();
