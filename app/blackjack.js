@@ -48,8 +48,13 @@ const updateScores = () => {
   dealerSumDisplay.textContent = `Dealer Count: ${dealerTotal}`;
 
   if (playerTotal > 21) {
-    const bustCard = playerHand[playerHand.length - 1];
-    alert(`Player busts with the card: ${bustCard.title}. You lose.`);
+    alert("You lose.");
+    resetGame();
+  } else if (playerTotal === 21) {
+    alert("Player wins with a Blackjack!");
+    resetGame();
+  } else if (dealerTotal === 21) {
+    alert("Dealer wins with a Blackjack!");
     resetGame();
   }
 };
@@ -69,21 +74,13 @@ const dealCards = () => {
   renderCards(playerHand, playerCardsContainer);
   renderCards(dealerHand, dealerCardsContainer, true);
 
-  // Dealer wins instantly if they have 21
-  const dealerTotal = dealerHand.reduce(
-    (sum, card) => sum + getCardValue(card),
-    0
-  );
-  if (dealerTotal === 21) {
-    alert("Dealer has a Blackjack! Dealer wins!");
-    resetGame();
-  }
+  updateScores(); // Ensure the initial scores are updated
 };
 
 hitButton.addEventListener("click", () => {
   playerHand.push(deck.pop());
   renderCards(playerHand, playerCardsContainer);
-  updateScores();
+  updateScores(); // Update the score after a hit
 });
 
 standButton.addEventListener("click", () => {
@@ -102,6 +99,7 @@ standButton.addEventListener("click", () => {
     dealerHand.push(newCard);
     dealerTotal = dealerHand.reduce((sum, card) => sum + getCardValue(card), 0);
     renderCards(dealerHand, dealerCardsContainer);
+    updateScores(); // Ensure the score updates after each dealer card is added
   }
 
   const playerTotal = playerHand.reduce(
@@ -124,3 +122,5 @@ standButton.addEventListener("click", () => {
 });
 
 dealCards();
+
+// when the player busts let the value and card show up before the alert pops up and restart the entire game
