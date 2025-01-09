@@ -9,6 +9,7 @@ const standButton = document.getElementById("stand-button");
 
 let playerHand = [];
 let dealerHand = [];
+let deckIndex = 0;
 
 const shuffleDeck = (deck) => {
   for (let i = deck.length - 1; i > 0; i--) {
@@ -48,14 +49,21 @@ const updateScores = () => {
   dealerSumDisplay.textContent = `Dealer Count: ${dealerTotal}`;
 
   if (playerTotal > 21) {
-    alert("You lose.");
-    resetGame();
+    renderCards(playerHand, playerCardsContainer);
+    setTimeout(() => {
+      alert("You lose.");
+      resetGame();
+    }, 500);
   } else if (playerTotal === 21) {
-    alert("Player wins with a Blackjack!");
-    resetGame();
+    setTimeout(() => {
+      alert("Player wins with a Blackjack!");
+      resetGame();
+    }, 300);
   } else if (dealerTotal === 21) {
-    alert("Dealer wins with a Blackjack!");
-    resetGame();
+    setTimeout(() => {
+      alert("Dealer wins with a Blackjack!");
+      resetGame();
+    }, 300);
   }
 };
 
@@ -64,23 +72,27 @@ const resetGame = () => {
   standButton.disabled = false;
   playerHand = [];
   dealerHand = [];
+  deckIndex = 0;
   dealCards();
 };
 
 const dealCards = () => {
   shuffleDeck(deck);
-  playerHand = [deck.pop(), deck.pop()];
-  dealerHand = [deck.pop(), deck.pop()];
+  playerHand = deck.slice(deckIndex, deckIndex + 2);
+  dealerHand = deck.slice(deckIndex + 2, deckIndex + 4);
+  deckIndex += 4;
+
   renderCards(playerHand, playerCardsContainer);
   renderCards(dealerHand, dealerCardsContainer, true);
 
-  updateScores(); // Ensure the initial scores are updated
+  updateScores();
 };
 
 hitButton.addEventListener("click", () => {
-  playerHand.push(deck.pop());
+  playerHand.push(deck.slice(deckIndex, deckIndex + 1)[0]);
+  deckIndex++;
   renderCards(playerHand, playerCardsContainer);
-  updateScores(); // Update the score after a hit
+  updateScores();
 });
 
 standButton.addEventListener("click", () => {
@@ -93,13 +105,12 @@ standButton.addEventListener("click", () => {
     (sum, card) => sum + getCardValue(card),
     0
   );
-  // Dealer hits if their total is 16 or less
   while (dealerTotal <= 16) {
-    const newCard = deck.pop();
-    dealerHand.push(newCard);
+    dealerHand.push(deck.slice(deckIndex, deckIndex + 1)[0]);
+    deckIndex++;
     dealerTotal = dealerHand.reduce((sum, card) => sum + getCardValue(card), 0);
     renderCards(dealerHand, dealerCardsContainer);
-    updateScores(); // Ensure the score updates after each dealer card is added
+    updateScores();
   }
 
   const playerTotal = playerHand.reduce(
@@ -122,5 +133,3 @@ standButton.addEventListener("click", () => {
 });
 
 dealCards();
-
-// when the player busts let the value and card show up before the alert pops up and restart the entire game
