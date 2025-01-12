@@ -9,8 +9,7 @@ const hitButton = document.getElementById("hit-button");
 const standButton = document.getElementById("stand-button");
 
 let playerHand = [],
-  dealerHand = [],
-  deckIndex = 0;
+  dealerHand = [];
 
 function shuffleDeck(deck) {
   for (let i = deck.length - 1; i > 0; i--) {
@@ -69,25 +68,24 @@ function updateScores() {
 function resetGame() {
   hitButton.disabled = standButton.disabled = false;
   playerHand = dealerHand = [];
-  deckIndex = 0;
   dealerCardsContainer.innerHTML = playerCardsContainer.innerHTML = "";
   dealCards();
 }
 
 function dealCards() {
   shuffleDeck(deck);
-  // Deal two cards to the player and two to the dealer
-  playerHand = [deck[deckIndex++], deck[deckIndex++]];
-  dealerHand = [deck[deckIndex++], deck[deckIndex++]];
-  
+  // Deal two cards to the player and two to the dealer, removing cards from the deck
+  playerHand = [deck.pop(), deck.pop()];
+  dealerHand = [deck.pop(), deck.pop()];
+
   renderCards(playerHand, playerCardsContainer);
   renderCards(dealerHand, dealerCardsContainer, true);
   updateScores();
 }
 
 function playerHit() {
-  // Ensure the deckIndex is incremented properly
-  playerHand.push(deck[deckIndex++]);
+  // Draw a card and remove it from the deck
+  playerHand.push(deck.pop());
   renderCards(playerHand, playerCardsContainer);
   updateScores();
 }
@@ -100,7 +98,7 @@ function dealerPlay() {
 
   setTimeout(() => {
     while (dealerTotal <= 16) {
-      dealerHand.push(deck[deckIndex++]);
+      dealerHand.push(deck.pop());
       renderCards(dealerHand, dealerCardsContainer);
       dealerTotal = adjustForAces(dealerHand);
       updateScores();
