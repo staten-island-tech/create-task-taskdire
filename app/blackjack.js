@@ -28,22 +28,12 @@ const getCardValue = (card) => {
 };
 
 const adjustForAces = (hand) => {
-  let total = 0;
-  let aces = 0;
-  
-  hand.forEach(card => {
-    let cardValue = getCardValue(card);
-    if (card.value === "ACE") {
-      aces++;
-    }
-    total += cardValue;
-  });
-  
+  let total = hand.reduce((sum, card) => sum + getCardValue(card), 0);
+  let aces = hand.filter((card) => card.value === "ACE").length;
   while (total > 21 && aces > 0) {
     total -= 10;
     aces--;
   }
-  
   return total;
 };
 
