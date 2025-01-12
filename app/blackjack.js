@@ -11,44 +11,41 @@ let playerHand = [],
   dealerHand = [],
   shuffledDeck = [];
 
-const shuffleDeck = () => {
-  shuffledDeck = [...deck.map(card => ({ ...card }))]; // Ensure a deep copy
+function startGame() {
+  shuffleDeck();
+  dealCards();
+  enableButtons();
+}
+
+function shuffleDeck() {
+  shuffledDeck = [...deck.map(card => ({ ...card }))];
   for (let i = shuffledDeck.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [shuffledDeck[i], shuffledDeck[j]] = [shuffledDeck[j], shuffledDeck[i]];
   }
-};
+}
 
-const drawCard = () => shuffledDeck.length ? shuffledDeck.shift() : null;
+function drawCard() {
+  return shuffledDeck.length ? shuffledDeck.shift() : null;
+}
 
-const getCardValue = (card) => {
+function getCardValue(card) {
   if (card.value === "ACE") return 11;
-  if (typeof card.value === "string") return 10; // Face cards count as 10
+  if (typeof card.value === "string") return 10;
   return card.value;
-};
+}
 
-const adjustForAces = (hand) => {
+function adjustForAces(hand) {
   let total = hand.reduce((sum, card) => sum + getCardValue(card), 0);
-  let aces = hand.filter((card) => card.value === "ACE").length;
+  let aces = hand.filter(card => card.value === "ACE").length;
   while (total > 21 && aces > 0) {
     total -= 10;
     aces--;
   }
   return total;
-};
+}
 
-const renderCards = (hand, container, hideSecondCard = false) => {
-  container.innerHTML = "";
-  hand.forEach((card, index) => {
-    const imgSrc = hideSecondCard && index === 1 ? "path/to/back-of-card.jpg" : card.image;
-    container.insertAdjacentHTML(
-      "beforeend",
-      `<div class="card"><img src="${imgSrc}" alt="${card.title}"></div>`
-    );
-  });
-};
-
-const updateScores = () => {
+function updateScores() {
   const playerTotal = adjustForAces(playerHand);
   const dealerTotal = adjustForAces(dealerHand);
   playerSumDisplay.textContent = `Player Count: ${playerTotal}`;
@@ -70,51 +67,63 @@ const updateScores = () => {
       resetGame();
     }, 300);
   }
-};
+}
 
-const resetGame = () => {
+function resetGame() {
   hitButton.disabled = standButton.disabled = false;
   playerHand = [];
   dealerHand = [];
   shuffleDeck();
   dealerCardsContainer.innerHTML = playerCardsContainer.innerHTML = "";
   dealCards();
-};
+}
 
-const dealCards = () => {
+function dealCards() {
   playerHand = [drawCard(), drawCard()];
   dealerHand = [drawCard(), drawCard()];
   renderCards(playerHand, playerCardsContainer);
   renderCards(dealerHand, dealerCardsContainer, true);
   updateScores();
-};
+}
 
-hitButton.addEventListener("click", () => {
-  playerHand.push(drawCard());
-  renderCards(playerHand, playerCardsContainer);
-  updateScores();
-});
+function renderCards(hand, container, isDealer = false) {
+  container.innerHTML = "";
+  hand.forEach(card => {
+    container.insertAdjacentHTML(
+      "beforeend",
+      `<div class="card"><img src="${card.image}" alt="${card.title}"></div>`
+    );
+  });
+}
 
-standButton.addEventListener("click", () => {
-  hitButton.disabled = standButton.disabled = true;
-  renderCards(dealerHand, dealerCardsContainer);
-  setTimeout(() => {
-    let dealerTotal = adjustForAces(dealerHand);
-    while (dealerTotal < 17) {
-      dealerHand.push(drawCard());
-      renderCards(dealerHand, dealerCardsContainer);
-      dealerTotal = adjustForAces(dealerHand);
-      updateScores();
-    }
-    const playerTotal = adjustForAces(playerHand);
+function enableButtons() {
+  hitButton.addEventListener("click", () => {
+    playerHand.push(drawCard());
+    renderCards(playerHand, playerCardsContainer);
+    updateScores();
+  });
+
+  standButton.addEventListener("click", () => {
+    hitButton.disabled = standButton.disabled = true;
+    renderCards(dealerHand, dealerCardsContainer);
     setTimeout(() => {
-      if (dealerTotal > 21) alert("Dealer busts! You win.");
-      else if (dealerTotal > playerTotal) alert("Dealer wins! You lose.");
-      else if (dealerTotal === playerTotal) alert("Push!");
-      else alert("You win!");
-      resetGame();
+      let dealerTotal = adjustForAces(dealerHand);
+      while (dealerTotal < 17) {
+        dealerHand.push(drawCard());
+        renderCards(dealerHand, dealerCardsContainer);
+        dealerTotal = adjustForAces(dealerHand);
+        updateScores();
+      }
+      const playerTotal = adjustForAces(playerHand);
+      setTimeout(() => {
+        if (dealerTotal > 21) alert("Dealer busts! You win.");
+        else if (dealerTotal > playerTotal) alert("Dealer wins! You lose.");
+        else if (dealerTotal === playerTotal) alert("Push!");
+        else alert("You win!");
+        resetGame();
+      }, 300);
     }, 300);
-  }, 300);
-});
+  });
+}
 
-resetGame();
+startGame();
