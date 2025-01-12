@@ -52,7 +52,17 @@ const updateScores = () => {
   const dealerTotal = adjustForAces(dealerHand);
   playerSumDisplay.textContent = `Player Count: ${playerTotal}`;
   dealerSumDisplay.textContent = `Dealer Count: ${dealerTotal}`;
-  if (playerTotal > 21) {
+  if (playerTotal === 21) {
+    setTimeout(() => {
+      alert("Blackjack! You win!");
+      resetGame();
+    }, 300);
+  } else if (dealerTotal === 21) {
+    setTimeout(() => {
+      alert("Dealer has Blackjack! You lose.");
+      resetGame();
+    }, 300);
+  } else if (playerTotal > 21) {
     setTimeout(() => {
       alert("You bust! Dealer wins.");
       resetGame();
