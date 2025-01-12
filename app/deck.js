@@ -4,7 +4,7 @@ const deck = [
     value: 2,
     type: "Hearts",
     image:
-      "https://media.istockphoto.com/photos/playing-card-two-of-hearts-picture-id166089272?k=6&m=166089272&s=612x612&w=0&h=Hzoz9GO_dsPYBMfJFHaXlMe5c5zzRIGZxCEXtKAyPQ8=",
+      "https://example.com/images/2_of_hearts.png",
   },
   {
     title: "3 of Hearts",
