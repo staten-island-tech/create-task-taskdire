@@ -30,19 +30,13 @@ function drawCard() {
 }
 
 function getCardValue(card) {
-  if (card.value === "ACE") return 11;
-  if (typeof card.value === "string") return 10;
+  if (card.value === "ACE") return 11; // Always return 11 for Ace
+  if (typeof card.value === "string") return 10; // Face cards count as 10
   return card.value;
 }
 
 function adjustForAces(hand) {
-  let total = hand.reduce((sum, card) => sum + getCardValue(card), 0);
-  let aces = hand.filter(card => card.value === "ACE").length;
-  while (total > 21 && aces > 0) {
-    total -= 10;
-    aces--;
-  }
-  return total;
+  return hand.reduce((sum, card) => sum + getCardValue(card), 0); // No need to adjust for Aces here anymore
 }
 
 function updateScores() {
