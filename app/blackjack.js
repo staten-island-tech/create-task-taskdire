@@ -9,42 +9,39 @@ const standButton = document.getElementById("stand-button");
 
 let playerHand = [],
   dealerHand = [],
-  deckIndex = 0;
+  shuffledDeck = [];
 
-const shuffleDeck = (deck) => {
-  for (let i = deck.length - 1; i > 0; i--) {
-    [deck[i], deck[Math.floor(Math.random() * (i + 1))]] = [
-      deck[Math.floor(Math.random() * (i + 1))],
-      deck[i],
+const shuffleDeck = () => {
+  shuffledDeck = [...deck];
+  for (let i = shuffledDeck.length - 1; i > 0; i--) {
+    [shuffledDeck[i], shuffledDeck[Math.floor(Math.random() * (i + 1))]] = [
+      shuffledDeck[Math.floor(Math.random() * (i + 1))],
+      shuffledDeck[i],
     ];
   }
 };
 
-// Update the getCardValue function to handle Aces correctly
+const drawCard = () => shuffledDeck.shift();
+
 const getCardValue = (card) => {
-  if (card.value === "ACE") return 11; // Initially, treat Ace as 11
+  if (card.value === "ACE") return 11;
   return Array.isArray(card.value) ? card.value[1] : card.value;
 };
 
-// Adjust the total score by converting Ace from 11 to 1 if necessary
 const adjustForAces = (hand) => {
   let total = hand.reduce((sum, card) => sum + getCardValue(card), 0);
   let aces = hand.filter((card) => card.value === "ACE").length;
-
-  // If the total exceeds 21, reduce Ace's value from 11 to 1
   while (total > 21 && aces > 0) {
-    total -= 10; // Change one Ace from 11 to 1
+    total -= 10;
     aces--;
   }
-
   return total;
 };
 
 const renderCards = (hand, container, hideSecondCard = false) => {
   container.innerHTML = "";
   hand.forEach((card, index) => {
-    const imgSrc =
-      hideSecondCard && index === 1 ? "path/to/back-of-card.jpg" : card.image;
+    const imgSrc = hideSecondCard && index === 1 ? "path/to/back-of-card.jpg" : card.image;
     container.insertAdjacentHTML(
       "beforeend",
       `<div class="card"><img src="${imgSrc}" alt="${card.title}"></div>`
@@ -57,8 +54,6 @@ const updateScores = () => {
   const dealerTotal = adjustForAces(dealerHand);
   playerSumDisplay.textContent = `Player Count: ${playerTotal}`;
   dealerSumDisplay.textContent = `Dealer Count: ${dealerTotal}`;
-
-  // Check for player bust
   if (playerTotal > 21) {
     setTimeout(() => {
       alert("You bust! Dealer wins.");
@@ -69,24 +64,23 @@ const updateScores = () => {
 
 const resetGame = () => {
   hitButton.disabled = standButton.disabled = false;
-  playerHand = dealerHand = [];
-  deckIndex = 0;
+  playerHand = [];
+  dealerHand = [];
+  shuffleDeck();
   dealerCardsContainer.innerHTML = playerCardsContainer.innerHTML = "";
   dealCards();
 };
 
 const dealCards = () => {
-  shuffleDeck(deck);
-  playerHand = deck.slice(deckIndex, deckIndex + 2);
-  dealerHand = deck.slice(deckIndex + 2, deckIndex + 4);
-  deckIndex += 4;
+  playerHand = [drawCard(), drawCard()];
+  dealerHand = [drawCard(), drawCard()];
   renderCards(playerHand, playerCardsContainer);
   renderCards(dealerHand, dealerCardsContainer, true);
   updateScores();
 };
 
 hitButton.addEventListener("click", () => {
-  playerHand.push(deck[deckIndex++]);
+  playerHand.push(drawCard());
   renderCards(playerHand, playerCardsContainer);
   updateScores();
 });
@@ -94,18 +88,14 @@ hitButton.addEventListener("click", () => {
 standButton.addEventListener("click", () => {
   hitButton.disabled = standButton.disabled = true;
   renderCards(dealerHand, dealerCardsContainer);
-
-  let dealerTotal = adjustForAces(dealerHand);
-
-  // Ensure dealer's cards update and dealer's total is calculated
   setTimeout(() => {
+    let dealerTotal = adjustForAces(dealerHand);
     while (dealerTotal <= 16) {
-      dealerHand.push(deck[deckIndex++]);
+      dealerHand.push(drawCard());
       renderCards(dealerHand, dealerCardsContainer);
       dealerTotal = adjustForAces(dealerHand);
-      updateScores(); // Update dealer count after each card is drawn
+      updateScores();
     }
-
     const playerTotal = adjustForAces(playerHand);
     setTimeout(() => {
       if (dealerTotal > 21) alert("Dealer busts! You win.");
@@ -113,8 +103,8 @@ standButton.addEventListener("click", () => {
       else if (dealerTotal === playerTotal) alert("Push!");
       else alert("You win!");
       resetGame();
-    }, 300); // Giving enough time for the dealer's hand to be displayed
-  }, 300); // Allow dealer's hand to be revealed and totals to update
+    }, 300);
+  }, 300);
 });
 
-dealCards();
+resetGame();
