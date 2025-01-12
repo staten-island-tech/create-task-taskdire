@@ -1,28 +1,12 @@
 import { deck } from "/deck.js";
 
-function getDealerCardsContainer() {
-  return document.getElementById("dealer-cards");
-}
-
-function getPlayerCardsContainer() {
-  return document.getElementById("player-cards");
-}
-
-function getDealerSumDisplay() {
-  return document.getElementById("dealer-sum");
-}
-
-function getPlayerSumDisplay() {
-  return document.getElementById("player-sum");
-}
-
-function getHitButton() {
-  return document.getElementById("hit-button");
-}
-
-function getStandButton() {
-  return document.getElementById("stand-button");
-}
+// Keep the DOM elements as constants
+const dealerCardsContainer = document.getElementById("dealer-cards");
+const playerCardsContainer = document.getElementById("player-cards");
+const dealerSumDisplay = document.getElementById("dealer-sum");
+const playerSumDisplay = document.getElementById("player-sum");
+const hitButton = document.getElementById("hit-button");
+const standButton = document.getElementById("stand-button");
 
 let playerHand = [],
   dealerHand = [],
@@ -38,7 +22,7 @@ function shuffleDeck(deck) {
 }
 
 function getCardValue(card) {
-  if (card.value === "ACE") return 11;
+  if (card.value === "ACE") return 11; // Initially, treat Ace as 11
   return Array.isArray(card.value) ? card.value[1] : card.value;
 }
 
@@ -46,8 +30,9 @@ function adjustForAces(hand) {
   let total = hand.reduce((sum, card) => sum + getCardValue(card), 0);
   let aces = hand.filter((card) => card.value === "ACE").length;
 
+  // If the total exceeds 21, reduce Ace's value from 11 to 1
   while (total > 21 && aces > 0) {
-    total -= 10;
+    total -= 10; // Change one Ace from 11 to 1
     aces--;
   }
 
@@ -69,9 +54,10 @@ function renderCards(hand, container, hideSecondCard = false) {
 function updateScores() {
   const playerTotal = adjustForAces(playerHand);
   const dealerTotal = adjustForAces(dealerHand);
-  getPlayerSumDisplay().textContent = `Player Count: ${playerTotal}`;
-  getDealerSumDisplay().textContent = `Dealer Count: ${dealerTotal}`;
+  playerSumDisplay.textContent = `Player Count: ${playerTotal}`;
+  dealerSumDisplay.textContent = `Dealer Count: ${dealerTotal}`;
 
+  // Check for player bust
   if (playerTotal > 21) {
     setTimeout(() => {
       alert("You bust! Dealer wins.");
@@ -81,10 +67,10 @@ function updateScores() {
 }
 
 function resetGame() {
-  getHitButton().disabled = getStandButton().disabled = false;
+  hitButton.disabled = standButton.disabled = false;
   playerHand = dealerHand = [];
   deckIndex = 0;
-  getDealerCardsContainer().innerHTML = getPlayerCardsContainer().innerHTML = "";
+  dealerCardsContainer.innerHTML = playerCardsContainer.innerHTML = "";
   dealCards();
 }
 
@@ -93,27 +79,27 @@ function dealCards() {
   playerHand = deck.slice(deckIndex, deckIndex + 2);
   dealerHand = deck.slice(deckIndex + 2, deckIndex + 4);
   deckIndex += 4;
-  renderCards(playerHand, getPlayerCardsContainer());
-  renderCards(dealerHand, getDealerCardsContainer(), true);
+  renderCards(playerHand, playerCardsContainer);
+  renderCards(dealerHand, dealerCardsContainer, true);
   updateScores();
 }
 
 function playerHit() {
   playerHand.push(deck[deckIndex++]);
-  renderCards(playerHand, getPlayerCardsContainer());
+  renderCards(playerHand, playerCardsContainer);
   updateScores();
 }
 
 function dealerPlay() {
-  getHitButton().disabled = getStandButton().disabled = true;
-  renderCards(dealerHand, getDealerCardsContainer());
+  hitButton.disabled = standButton.disabled = true;
+  renderCards(dealerHand, dealerCardsContainer);
 
   let dealerTotal = adjustForAces(dealerHand);
 
   setTimeout(() => {
     while (dealerTotal <= 16) {
       dealerHand.push(deck[deckIndex++]);
-      renderCards(dealerHand, getDealerCardsContainer());
+      renderCards(dealerHand, dealerCardsContainer);
       dealerTotal = adjustForAces(dealerHand);
       updateScores();
     }
@@ -129,7 +115,7 @@ function dealerPlay() {
   }, 300);
 }
 
-getHitButton().addEventListener("click", playerHit);
-getStandButton().addEventListener("click", dealerPlay);
+hitButton.addEventListener("click", playerHit);
+standButton.addEventListener("click", dealerPlay);
 
 dealCards();
