@@ -1,53 +1,67 @@
 import { deck } from "/deck.js";
 
-let playerHand = [],
-  dealerHand = [],
-  shuffledDeck = [];
-
-function shuffleDeck() {
-  shuffledDeck = [...deck.map(card => ({ ...card }))];
-  for (let i = shuffledDeck.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffledDeck[i], shuffledDeck[j]] = [shuffledDeck[j], shuffledDeck[i]];
-  }
+function getDealerCardsContainer() {
+  return document.getElementById("dealer-cards");
 }
 
-function drawCard() {
-  return shuffledDeck.length ? shuffledDeck.shift() : null;
+function getPlayerCardsContainer() {
+  return document.getElementById("player-cards");
+}
+
+function getDealerSumDisplay() {
+  return document.getElementById("dealer-sum");
+}
+
+function getPlayerSumDisplay() {
+  return document.getElementById("player-sum");
+}
+
+function getHitButton() {
+  return document.getElementById("hit-button");
+}
+
+function getStandButton() {
+  return document.getElementById("stand-button");
+}
+
+let playerHand = [],
+  dealerHand = [],
+  deckIndex = 0;
+
+function shuffleDeck(deck) {
+  for (let i = deck.length - 1; i > 0; i--) {
+    [deck[i], deck[Math.floor(Math.random() * (i + 1))]] = [
+      deck[Math.floor(Math.random() * (i + 1))],
+      deck[i],
+    ];
+  }
 }
 
 function getCardValue(card) {
   if (card.value === "ACE") return 11;
-  if (typeof card.value === "string") return 10;
-  return card.value;
+  return Array.isArray(card.value) ? card.value[1] : card.value;
 }
 
 function adjustForAces(hand) {
-  let total = 0;
-  let aces = 0;
-  
-  hand.forEach(card => {
-    let cardValue = getCardValue(card);
-    if (card.value === "ACE") {
-      aces++;
-    }
-    total += cardValue;
-  });
-  
+  let total = hand.reduce((sum, card) => sum + getCardValue(card), 0);
+  let aces = hand.filter((card) => card.value === "ACE").length;
+
   while (total > 21 && aces > 0) {
     total -= 10;
     aces--;
   }
-  
+
   return total;
 }
 
-function renderCards(hand, container) {
+function renderCards(hand, container, hideSecondCard = false) {
   container.innerHTML = "";
-  hand.forEach(card => {
+  hand.forEach((card, index) => {
+    const imgSrc =
+      hideSecondCard && index === 1 ? "path/to/back-of-card.jpg" : card.image;
     container.insertAdjacentHTML(
       "beforeend",
-      `<div class="card"><img src="${card.image}" alt="${card.title}"></div>`
+      `<div class="card"><img src="${imgSrc}" alt="${card.title}"></div>`
     );
   });
 }
@@ -55,87 +69,67 @@ function renderCards(hand, container) {
 function updateScores() {
   const playerTotal = adjustForAces(playerHand);
   const dealerTotal = adjustForAces(dealerHand);
-  playerSumDisplay.textContent = `Player Count: ${playerTotal}`;
-  dealerSumDisplay.textContent = `Dealer Count: ${dealerTotal}`;
+  getPlayerSumDisplay().textContent = `Player Count: ${playerTotal}`;
+  getDealerSumDisplay().textContent = `Dealer Count: ${dealerTotal}`;
 
-  if (playerTotal === 21 && playerHand.length === 2) {
-    handleBlackjack("Player");
-  } else if (dealerTotal === 21 && dealerHand.length === 2) {
-    handleBlackjack("Dealer");
-  } else if (playerTotal > 21) {
-    handleBust("Player");
+  if (playerTotal > 21) {
+    setTimeout(() => {
+      alert("You bust! Dealer wins.");
+      resetGame();
+    }, 300);
   }
 }
 
-function handleBlackjack(winner) {
-  setTimeout(() => {
-    alert(`${winner} has Blackjack! ${winner === "Player" ? "You win!" : "You lose."}`);
-    resetGame();
-  }, 300);
-}
-
-function handleBust(loser) {
-  setTimeout(() => {
-    alert(`${loser} busts! Dealer wins.`);
-    resetGame();
-  }, 300);
-}
-
 function resetGame() {
-  hitButton.disabled = standButton.disabled = false;
-  playerHand = [];
-  dealerHand = [];
-  shuffleDeck();
-  dealerCardsContainer.innerHTML = playerCardsContainer.innerHTML = "";
+  getHitButton().disabled = getStandButton().disabled = false;
+  playerHand = dealerHand = [];
+  deckIndex = 0;
+  getDealerCardsContainer().innerHTML = getPlayerCardsContainer().innerHTML = "";
   dealCards();
 }
 
 function dealCards() {
-  playerHand = [drawCard(), drawCard()];
-  dealerHand = [drawCard(), drawCard()];
-  renderCards(playerHand, playerCardsContainer);
-  renderCards(dealerHand, dealerCardsContainer);
+  shuffleDeck(deck);
+  playerHand = deck.slice(deckIndex, deckIndex + 2);
+  dealerHand = deck.slice(deckIndex + 2, deckIndex + 4);
+  deckIndex += 4;
+  renderCards(playerHand, getPlayerCardsContainer());
+  renderCards(dealerHand, getDealerCardsContainer(), true);
   updateScores();
 }
 
 function playerHit() {
-  playerHand.push(drawCard());
-  renderCards(playerHand, playerCardsContainer);
+  playerHand.push(deck[deckIndex++]);
+  renderCards(playerHand, getPlayerCardsContainer());
   updateScores();
 }
 
 function dealerPlay() {
-  hitButton.disabled = standButton.disabled = true;
-  renderCards(dealerHand, dealerCardsContainer);
+  getHitButton().disabled = getStandButton().disabled = true;
+  renderCards(dealerHand, getDealerCardsContainer());
+
+  let dealerTotal = adjustForAces(dealerHand);
+
   setTimeout(() => {
-    let dealerTotal = adjustForAces(dealerHand);
-    while (dealerTotal < 17) {
-      dealerHand.push(drawCard());
-      renderCards(dealerHand, dealerCardsContainer);
+    while (dealerTotal <= 16) {
+      dealerHand.push(deck[deckIndex++]);
+      renderCards(dealerHand, getDealerCardsContainer());
       dealerTotal = adjustForAces(dealerHand);
       updateScores();
     }
-    determineWinner(dealerTotal);
+
+    const playerTotal = adjustForAces(playerHand);
+    setTimeout(() => {
+      if (dealerTotal > 21) alert("Dealer busts! You win.");
+      else if (dealerTotal > playerTotal) alert("Dealer wins! You lose.");
+      else if (dealerTotal === playerTotal) alert("Push!");
+      else alert("You win!");
+      resetGame();
+    }, 300);
   }, 300);
 }
 
-function determineWinner(dealerTotal) {
-  const playerTotal = adjustForAces(playerHand);
-  setTimeout(() => {
-    if (dealerTotal > 21) {
-      alert("Dealer busts! You win.");
-    } else if (dealerTotal > playerTotal) {
-      alert("Dealer wins! You lose.");
-    } else if (dealerTotal === playerTotal) {
-      alert("Push!");
-    } else {
-      alert("You win!");
-    }
-    resetGame();
-  }, 300);
-}
+getHitButton().addEventListener("click", playerHit);
+getStandButton().addEventListener("click", dealerPlay);
 
-hitButton.addEventListener("click", playerHit);
-standButton.addEventListener("click", dealerPlay);
-
-resetGame();
+dealCards();
