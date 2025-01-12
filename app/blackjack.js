@@ -1,6 +1,5 @@
 import { deck } from "/deck.js";
 
-// Keep the DOM elements as constants
 const dealerCardsContainer = document.getElementById("dealer-cards");
 const playerCardsContainer = document.getElementById("player-cards");
 const dealerSumDisplay = document.getElementById("dealer-sum");
@@ -9,7 +8,8 @@ const hitButton = document.getElementById("hit-button");
 const standButton = document.getElementById("stand-button");
 
 let playerHand = [],
-  dealerHand = [];
+  dealerHand = [],
+  deckIndex = 0;
 
 function shuffleDeck(deck) {
   for (let i = deck.length - 1; i > 0; i--) {
@@ -21,7 +21,7 @@ function shuffleDeck(deck) {
 }
 
 function getCardValue(card) {
-  if (card.value === "ACE") return 11; // Initially, treat Ace as 11
+  if (card.value === "ACE") return 11;
   return Array.isArray(card.value) ? card.value[1] : card.value;
 }
 
@@ -29,23 +29,20 @@ function adjustForAces(hand) {
   let total = hand.reduce((sum, card) => sum + getCardValue(card), 0);
   let aces = hand.filter((card) => card.value === "ACE").length;
 
-  // If the total exceeds 21, reduce Ace's value from 11 to 1
   while (total > 21 && aces > 0) {
-    total -= 10; // Change one Ace from 11 to 1
+    total -= 10;
     aces--;
   }
 
   return total;
 }
 
-function renderCards(hand, container, hideSecondCard = false) {
+function renderCards(hand, container) {
   container.innerHTML = "";
-  hand.forEach((card, index) => {
-    const imgSrc =
-      hideSecondCard && index === 1 ? "path/to/back-of-card.jpg" : card.image;
+  hand.forEach((card) => {
     container.insertAdjacentHTML(
       "beforeend",
-      `<div class="card"><img src="${imgSrc}" alt="${card.title}"></div>`
+      `<div class="card"><img src="${card.image}" alt="${card.title}"></div>`
     );
   });
 }
@@ -56,7 +53,6 @@ function updateScores() {
   playerSumDisplay.textContent = `Player Count: ${playerTotal}`;
   dealerSumDisplay.textContent = `Dealer Count: ${dealerTotal}`;
 
-  // Check for player bust
   if (playerTotal > 21) {
     setTimeout(() => {
       alert("You bust! Dealer wins.");
@@ -68,24 +64,22 @@ function updateScores() {
 function resetGame() {
   hitButton.disabled = standButton.disabled = false;
   playerHand = dealerHand = [];
+  deckIndex = 0;
   dealerCardsContainer.innerHTML = playerCardsContainer.innerHTML = "";
   dealCards();
 }
 
 function dealCards() {
   shuffleDeck(deck);
-  // Deal two cards to the player and two to the dealer, removing cards from the deck
-  playerHand = [deck.pop(), deck.pop()];
-  dealerHand = [deck.pop(), deck.pop()];
-
+  playerHand = [deck[deckIndex++], deck[deckIndex++]];
+  dealerHand = [deck[deckIndex++], deck[deckIndex++]];
   renderCards(playerHand, playerCardsContainer);
-  renderCards(dealerHand, dealerCardsContainer, true);
+  renderCards(dealerHand, dealerCardsContainer);
   updateScores();
 }
 
 function playerHit() {
-  // Draw a card and remove it from the deck
-  playerHand.push(deck.pop());
+  playerHand.push(deck[deckIndex++]);
   renderCards(playerHand, playerCardsContainer);
   updateScores();
 }
@@ -98,7 +92,7 @@ function dealerPlay() {
 
   setTimeout(() => {
     while (dealerTotal <= 16) {
-      dealerHand.push(deck.pop());
+      dealerHand.push(deck[deckIndex++]);
       renderCards(dealerHand, dealerCardsContainer);
       dealerTotal = adjustForAces(dealerHand);
       updateScores();
@@ -115,7 +109,14 @@ function dealerPlay() {
   }, 300);
 }
 
-hitButton.addEventListener("click", playerHit);
-standButton.addEventListener("click", dealerPlay);
+function addEventListeners() {
+  hitButton.addEventListener("click", playerHit);
+  standButton.addEventListener("click", dealerPlay);
+}
 
-dealCards();
+function initializeGame() {
+  addEventListeners();
+  dealCards();
+}
+
+initializeGame();
