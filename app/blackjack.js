@@ -23,16 +23,27 @@ const drawCard = () => shuffledDeck.length ? shuffledDeck.shift() : null;
 
 const getCardValue = (card) => {
   if (card.value === "ACE") return 11;
-  return Array.isArray(card.value) ? card.value[1] : card.value;
+  if (typeof card.value === "string") return 10; // Face cards count as 10
+  return card.value;
 };
 
 const adjustForAces = (hand) => {
-  let total = hand.reduce((sum, card) => sum + getCardValue(card), 0);
-  let aces = hand.filter((card) => card.value === "ACE").length;
+  let total = 0;
+  let aces = 0;
+  
+  hand.forEach(card => {
+    let cardValue = getCardValue(card);
+    if (card.value === "ACE") {
+      aces++;
+    }
+    total += cardValue;
+  });
+  
   while (total > 21 && aces > 0) {
     total -= 10;
     aces--;
   }
+  
   return total;
 };
 
@@ -52,12 +63,13 @@ const updateScores = () => {
   const dealerTotal = adjustForAces(dealerHand);
   playerSumDisplay.textContent = `Player Count: ${playerTotal}`;
   dealerSumDisplay.textContent = `Dealer Count: ${dealerTotal}`;
-  if (playerTotal === 21) {
+
+  if (playerTotal === 21 && playerHand.length === 2) {
     setTimeout(() => {
       alert("Blackjack! You win!");
       resetGame();
     }, 300);
-  } else if (dealerTotal === 21) {
+  } else if (dealerTotal === 21 && dealerHand.length === 2) {
     setTimeout(() => {
       alert("Dealer has Blackjack! You lose.");
       resetGame();
@@ -98,7 +110,7 @@ standButton.addEventListener("click", () => {
   renderCards(dealerHand, dealerCardsContainer);
   setTimeout(() => {
     let dealerTotal = adjustForAces(dealerHand);
-    while (dealerTotal <= 16) {
+    while (dealerTotal < 17) {
       dealerHand.push(drawCard());
       renderCards(dealerHand, dealerCardsContainer);
       dealerTotal = adjustForAces(dealerHand);
