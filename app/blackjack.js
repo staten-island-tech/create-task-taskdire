@@ -1,33 +1,28 @@
 import { deck } from "/deck.js";
 
-const dealerCardsContainer = document.getElementById("dealer-cards");
-const playerCardsContainer = document.getElementById("player-cards");
-const dealerSumDisplay = document.getElementById("dealer-sum");
-const playerSumDisplay = document.getElementById("player-sum");
-const hitButton = document.getElementById("hit-button");
-const standButton = document.getElementById("stand-button");
-
 let playerHand = [],
   dealerHand = [],
   shuffledDeck = [];
 
-const shuffleDeck = () => {
+function shuffleDeck() {
   shuffledDeck = [...deck.map(card => ({ ...card }))];
   for (let i = shuffledDeck.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [shuffledDeck[i], shuffledDeck[j]] = [shuffledDeck[j], shuffledDeck[i]];
   }
-};
+}
 
-const drawCard = () => shuffledDeck.length ? shuffledDeck.shift() : null;
+function drawCard() {
+  return shuffledDeck.length ? shuffledDeck.shift() : null;
+}
 
-const getCardValue = (card) => {
+function getCardValue(card) {
   if (card.value === "ACE") return 11;
   if (typeof card.value === "string") return 10;
   return card.value;
-};
+}
 
-const adjustForAces = (hand) => {
+function adjustForAces(hand) {
   let total = 0;
   let aces = 0;
   
@@ -45,9 +40,9 @@ const adjustForAces = (hand) => {
   }
   
   return total;
-};
+}
 
-const renderCards = (hand, container) => {
+function renderCards(hand, container) {
   container.innerHTML = "";
   hand.forEach(card => {
     container.insertAdjacentHTML(
@@ -55,9 +50,9 @@ const renderCards = (hand, container) => {
       `<div class="card"><img src="${card.image}" alt="${card.title}"></div>`
     );
   });
-};
+}
 
-const updateScores = () => {
+function updateScores() {
   const playerTotal = adjustForAces(playerHand);
   const dealerTotal = adjustForAces(dealerHand);
   playerSumDisplay.textContent = `Player Count: ${playerTotal}`;
@@ -70,46 +65,46 @@ const updateScores = () => {
   } else if (playerTotal > 21) {
     handleBust("Player");
   }
-};
+}
 
-const handleBlackjack = (winner) => {
+function handleBlackjack(winner) {
   setTimeout(() => {
     alert(`${winner} has Blackjack! ${winner === "Player" ? "You win!" : "You lose."}`);
     resetGame();
   }, 300);
-};
+}
 
-const handleBust = (loser) => {
+function handleBust(loser) {
   setTimeout(() => {
     alert(`${loser} busts! Dealer wins.`);
     resetGame();
   }, 300);
-};
+}
 
-const resetGame = () => {
+function resetGame() {
   hitButton.disabled = standButton.disabled = false;
   playerHand = [];
   dealerHand = [];
   shuffleDeck();
   dealerCardsContainer.innerHTML = playerCardsContainer.innerHTML = "";
   dealCards();
-};
+}
 
-const dealCards = () => {
+function dealCards() {
   playerHand = [drawCard(), drawCard()];
   dealerHand = [drawCard(), drawCard()];
   renderCards(playerHand, playerCardsContainer);
   renderCards(dealerHand, dealerCardsContainer);
   updateScores();
-};
+}
 
-const playerHit = () => {
+function playerHit() {
   playerHand.push(drawCard());
   renderCards(playerHand, playerCardsContainer);
   updateScores();
-};
+}
 
-const dealerPlay = () => {
+function dealerPlay() {
   hitButton.disabled = standButton.disabled = true;
   renderCards(dealerHand, dealerCardsContainer);
   setTimeout(() => {
@@ -122,9 +117,9 @@ const dealerPlay = () => {
     }
     determineWinner(dealerTotal);
   }, 300);
-};
+}
 
-const determineWinner = (dealerTotal) => {
+function determineWinner(dealerTotal) {
   const playerTotal = adjustForAces(playerHand);
   setTimeout(() => {
     if (dealerTotal > 21) {
@@ -138,7 +133,7 @@ const determineWinner = (dealerTotal) => {
     }
     resetGame();
   }, 300);
-};
+}
 
 hitButton.addEventListener("click", playerHit);
 standButton.addEventListener("click", dealerPlay);
