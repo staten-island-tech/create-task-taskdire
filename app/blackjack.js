@@ -9,7 +9,7 @@ const standButton = document.getElementById("stand-button");
 
 let playerHand = [],
   dealerHand = [],
-  deckIndex = 0;
+  remainingDeck = [];
 
 function shuffleDeck(deck) {
   for (let i = deck.length - 1; i > 0; i--) {
@@ -63,25 +63,35 @@ function updateScores() {
 
 function resetGame() {
   hitButton.disabled = standButton.disabled = false;
-  playerHand = dealerHand = [];
-  deckIndex = 0;
-  dealerCardsContainer.innerHTML = playerCardsContainer.innerHTML = "";
+  playerHand = [];
+  dealerHand = [];
+  remainingDeck = [...deck];
+  shuffleDeck(remainingDeck);
+  dealerCardsContainer.innerHTML = "";
+  playerCardsContainer.innerHTML = "";
   dealCards();
 }
 
+function drawCard() {
+  return remainingDeck.length > 0 ? remainingDeck.shift() : null;
+}
+
 function dealCards() {
-  shuffleDeck(deck);
-  playerHand = [deck[deckIndex++], deck[deckIndex++]];
-  dealerHand = [deck[deckIndex++], deck[deckIndex++]];
+  shuffleDeck(remainingDeck);
+  playerHand = [drawCard(), drawCard()];
+  dealerHand = [drawCard(), drawCard()];
   renderCards(playerHand, playerCardsContainer);
   renderCards(dealerHand, dealerCardsContainer);
   updateScores();
 }
 
 function playerHit() {
-  playerHand.push(deck[deckIndex++]);
-  renderCards(playerHand, playerCardsContainer);
-  updateScores();
+  const card = drawCard();
+  if (card) {
+    playerHand.push(card);
+    renderCards(playerHand, playerCardsContainer);
+    updateScores();
+  }
 }
 
 function dealerPlay() {
@@ -92,10 +102,15 @@ function dealerPlay() {
 
   setTimeout(() => {
     while (dealerTotal <= 16) {
-      dealerHand.push(deck[deckIndex++]);
-      renderCards(dealerHand, dealerCardsContainer);
-      dealerTotal = adjustForAces(dealerHand);
-      updateScores();
+      const card = drawCard();
+      if (card) {
+        dealerHand.push(card);
+        renderCards(dealerHand, dealerCardsContainer);
+        dealerTotal = adjustForAces(dealerHand);
+        updateScores();
+      } else {
+        break;
+      }
     }
 
     const playerTotal = adjustForAces(playerHand);
@@ -115,6 +130,8 @@ function addEventListeners() {
 }
 
 function initializeGame() {
+  remainingDeck = [...deck];
+  shuffleDeck(remainingDeck);
   addEventListeners();
   dealCards();
 }
