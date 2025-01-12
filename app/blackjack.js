@@ -12,16 +12,14 @@ let playerHand = [],
   shuffledDeck = [];
 
 const shuffleDeck = () => {
-  shuffledDeck = [...deck];
+  shuffledDeck = [...deck.map(card => ({ ...card }))]; // Ensure a deep copy
   for (let i = shuffledDeck.length - 1; i > 0; i--) {
-    [shuffledDeck[i], shuffledDeck[Math.floor(Math.random() * (i + 1))]] = [
-      shuffledDeck[Math.floor(Math.random() * (i + 1))],
-      shuffledDeck[i],
-    ];
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffledDeck[i], shuffledDeck[j]] = [shuffledDeck[j], shuffledDeck[i]];
   }
 };
 
-const drawCard = () => shuffledDeck.shift();
+const drawCard = () => shuffledDeck.length ? shuffledDeck.shift() : null;
 
 const getCardValue = (card) => {
   if (card.value === "ACE") return 11;
