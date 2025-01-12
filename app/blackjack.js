@@ -1,4 +1,4 @@
-import { deck } from "/deck.js";
+import { deck as originalDeck } from "/deck.js";
 
 const dealerCardsContainer = document.getElementById("dealer-cards");
 const playerCardsContainer = document.getElementById("player-cards");
@@ -13,10 +13,8 @@ let playerHand = [],
 
 function shuffleDeck(deck) {
   for (let i = deck.length - 1; i > 0; i--) {
-    [deck[i], deck[Math.floor(Math.random() * (i + 1))]] = [
-      deck[Math.floor(Math.random() * (i + 1))],
-      deck[i],
-    ];
+    const j = Math.floor(Math.random() * (i + 1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
   }
 }
 
@@ -33,7 +31,6 @@ function adjustForAces(hand) {
     total -= 10;
     aces--;
   }
-
   return total;
 }
 
@@ -65,7 +62,7 @@ function resetGame() {
   hitButton.disabled = standButton.disabled = false;
   playerHand = [];
   dealerHand = [];
-  remainingDeck = [...deck];
+  remainingDeck = [...originalDeck]; // Make a fresh copy of the deck
   shuffleDeck(remainingDeck);
   dealerCardsContainer.innerHTML = "";
   playerCardsContainer.innerHTML = "";
@@ -73,10 +70,11 @@ function resetGame() {
 }
 
 function drawCard() {
-  return remainingDeck.length > 0 ? remainingDeck.shift() : null;
+  return remainingDeck.length > 0 ? remainingDeck.pop() : null; // Pop ensures unique draws
 }
 
 function dealCards() {
+  remainingDeck = [...originalDeck]; // Reset and shuffle deck at the start of each game
   shuffleDeck(remainingDeck);
   playerHand = [drawCard(), drawCard()];
   dealerHand = [drawCard(), drawCard()];
@@ -130,7 +128,7 @@ function addEventListeners() {
 }
 
 function initializeGame() {
-  remainingDeck = [...deck];
+  remainingDeck = [...originalDeck];
   shuffleDeck(remainingDeck);
   addEventListeners();
   dealCards();
