@@ -76,15 +76,17 @@ function resetGame() {
 
 function dealCards() {
   shuffleDeck(deck);
-  playerHand = deck.slice(deckIndex, deckIndex + 2);
-  dealerHand = deck.slice(deckIndex + 2, deckIndex + 4);
-  deckIndex += 4;
+  // Deal two cards to the player and two to the dealer
+  playerHand = [deck[deckIndex++], deck[deckIndex++]];
+  dealerHand = [deck[deckIndex++], deck[deckIndex++]];
+  
   renderCards(playerHand, playerCardsContainer);
   renderCards(dealerHand, dealerCardsContainer, true);
   updateScores();
 }
 
 function playerHit() {
+  // Ensure the deckIndex is incremented properly
   playerHand.push(deck[deckIndex++]);
   renderCards(playerHand, playerCardsContainer);
   updateScores();
