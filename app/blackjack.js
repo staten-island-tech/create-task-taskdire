@@ -62,7 +62,7 @@ function resetGame() {
   hitButton.disabled = standButton.disabled = false;
   playerHand = [];
   dealerHand = [];
-  remainingDeck = [...originalDeck]; // Make a fresh copy of the deck
+  remainingDeck = [...originalDeck];
   shuffleDeck(remainingDeck);
   dealerCardsContainer.innerHTML = "";
   playerCardsContainer.innerHTML = "";
@@ -70,11 +70,11 @@ function resetGame() {
 }
 
 function drawCard() {
-  return remainingDeck.length > 0 ? remainingDeck.pop() : null; // Pop ensures unique draws
+  return remainingDeck.length > 0 ? remainingDeck.pop() : null;
 }
 
 function dealCards() {
-  remainingDeck = [...originalDeck]; // Reset and shuffle deck at the start of each game
+  remainingDeck = [...originalDeck];
   shuffleDeck(remainingDeck);
   playerHand = [drawCard(), drawCard()];
   dealerHand = [drawCard(), drawCard()];
